@@ -23,6 +23,12 @@ module Heroku::Command
     def add
       is_root?
 
+      unless sass_files.empty?
+
+        display "===== Compiling SCSS..."
+
+      end
+
       display "===== Compiling assets...", false
 
         run "jammit -f"
@@ -81,6 +87,20 @@ module Heroku::Command
 
       def formatted_date(date)
         date.strftime("%A %d, %Y")
+      end
+
+      def sass_files
+        @sass_files ||= Dir['public/stylesheets/**/*.scss']
+      end
+
+      def compile_scss
+        scss_files.each do |sass|
+          basename = sass.gsub(/public\/stylesheets\/sass\//, '').gsub(/\.scss$/, '')
+          next if basename.match(/^_/)   # skip includes
+          css = "public/stylesheets/#{basename}.css"
+          # puts "Compiling #{sass} -> #{css}"
+          run "sass #{sass} #{css}"
+        end
       end
 
   end
